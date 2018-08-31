@@ -1,0 +1,114 @@
+---
+title:           Measures of Misuse 
+author:          Dennis Wollersheim and Stephen Callinan
+date:            11.07.2018
+linkcolor:       cyan
+citecolor:       grey
+output:
+  pdf_document:
+    highlight:   zenburn
+---
+
+\tableofcontents
+
+# motivation 
+
+Get all 
+
+```{r results='hide', message=FALSE, warning=FALSE}
+
+source('lib/functions.R')
+source( "lib/get_data.R")
+# -------------------------------------------------
+
+read.csv('data/opioid_people.csv' ) %>% 
+  as.tibble() %>% 
+  mutate( age = 2004 - yob , 
+         age_group=cut( age, breaks=0:6*20 )) %>%
+  { . } -> df_people
+
+
+
+read.csv('data/opioid_scripts.csv' ) %>% 
+  as.tibble() %>% 
+  { . } -> df_scripts
+
+#TODO: use real ddd
+df_scripts %>%
+  distinct(pbs_code ) %>%
+  mutate( dosage_multiplier = 1 ) %>% 
+  { . } -> df_ddd
+
+
+df_scripts %>%
+  inner_join( df_ddd ) %>%
+  mutate( no_doses = quantity * dosage_multiplier ) %>% 
+  { . } -> df_scripts
+
+
+df_scripts %>%
+  mutate( year= year(spply_dt ) ) %>%
+  group_by( pin, year)%>%
+  summarise( magnitude = sum( no_doses )) %>% 
+  { . } -> df_person_year 
+
+
+df_scripts %>%
+  mutate( quarter= quarter(spply_dt, with_year=TRUE ) ) %>%
+  group_by( pin, quarter)%>%
+  summarise( magnitude = sum( no_doses )) %>% 
+  group_by(pin) 
+  mutate
+  { . } -> df_person_year 
+
+
+
+
+
+```
+
+
+
+```{r
+
+
+
+df_person_year %>%
+  inner_join( df_people ) %>%
+  filter( magnitude > 730 ) %>%
+  ggplot( aes( year, magnitude, group=year )) + geom_boxplot() +
+  facet_wrap( ~sex )
+
+
+df_person_year %>%
+  inner_join( df_people ) %>%
+  filter( magnitude > 730 ) %>%
+  ggplot( aes( year, magnitude, group=year )) + geom_boxplot() +
+  facet_wrap( ~age_group ) + 
+  ggtitle( 'range of magnitude by age group')
+
+
+df_person_year %>%
+  inner_join( df_people ) %>%
+  filter( magnitude > 730 ) %>%
+  ggplot( aes( year, group=year )) + geom_bar() +
+  facet_wrap( ~age_group ) + 
+  ggtitle( 'number of heavy users by age group and year')
+
+df_person_year %>%
+  inner_join( df_people ) %>%
+  filter( magnitude > 730 ) %>%
+  ggplot( aes( year, group=year )) + geom_bar() +
+  facet_wrap( ~sex ) + 
+  ggtitle( 'number of heavy users by sex and year')
+
+df_person_year %>%
+  inner_join( df_people ) %>%
+  filter( magnitude > 730 ) %>%
+  ggplot( aes( year, group=year )) + geom_bar() +
+  facet_grid( sex~age_group ) + 
+  ggtitle( 'number of heavy users by sex and year')
+
+```
+
+
