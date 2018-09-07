@@ -31,7 +31,7 @@ my_db_get_query ( "
       JOIN pbs_item pi USING (pbs_code) 
       WHERE pi.atc_code LIKE 'N02A%' ") %>%
   as.tibble() %>% 
-  { . } -> df_opioid
+  { . } -> df_pbs
 
 my_db_get_query ( " select * from patient_rr ") %>%
   as.tibble() %>% 
@@ -53,6 +53,39 @@ my_db_get_query ( "
   as.tibble() %>% 
   { . } -> df_mbs
 
+```
+
+# Analyse data 
+
+  - for each patient
+  - for each script, calculate start and end
+
+```{r}
+
+find_multi_script_group <- function  (supply_date, ndays ) {
+  overlap = 1
+  pos = 1
+  group_id = 0
+  rv=c()
+  while (pos <= length( ndays )) {
+    start_group = pos
+    end_date = supply_date[ pos ] + ndays[ pos ] + overlap
+
+    pos = pos + 1
+    in_session=TRUE
+    while ( (pos <= length( ndays )) &
+           (supply_date[pos] - overlap < end_date) 
+         ) {
+      end_date = supply_date[ pos ] + ndays[ pos ] + overlap
+      pos = pos + 1
+    }
+    rv = c(rv, rep( group_id, pos - start_group  ))
+    group_id = group_id + 1
+  }
+  rv
+}
+
+
 
 
 if (file.exists( intersect_filename )) {
@@ -60,12 +93,26 @@ if (file.exists( intersect_filename )) {
 } else {
   #
 
-  df_opioid %>%
-    group_by(pin) %>%
-    mutate( end_date = spply_dt + 7,
-           start_date = spply_dt - 7) %>%
-    select( pin, pbs_code, quantity, spply_dt, start_date, end_date) %>% 
-    nest( pbs_code, spply_dt, start_date, end_date, quantity, .key=pbs ) %>%
+
+  df_pbs %>%
+    mutate( row_id = row_number() ) %>%
+    group_by( pin ) %>%
+    arrange( pin, spply_dt ) %>%
+    mutate( group = find_multi_script_group( spply_dt, quantity)) %>%
+    group_by( pin, group ) %>%
+    arrange( pin, spply_dt, group ) %>% 
+    mutate( gl = max( spply_dt ) - min(spply_dt ), 
+           ndays = sum(quantity ),
+           nscripts = n()) %>%
+    filter( nscripts > 1 ) %>% 
+    { . } -> df_pbs_multi_groups
+
+df_pbs_multi_groups  %>%
+    group_by( pin, group ) %>%
+    summarise( start_date = min( spply_dt ) - 7, 
+              end_date = max( spply_dt ) ) %>%
+    select( pin,  start_date, end_date, group) %>% 
+    nest( start_date, end_date,  group, .key=pbs ) %>%
     { . } -> df_pbs_nested
 
   #
@@ -109,20 +156,12 @@ save(df_intersect, file=intersect_filename)
 ```{r analysis}
 
 df_intersect %>%
-  count( pin, spr ) %>%
-  count( pin, sort=TRUE ) %>%
-  ggplot( aes( pin, nn ) ) + geom_col()
+  count( pin, spr) %>%
+  group_by( pin ) %>%
+  summarise( mn = mean( n ) ) %>%
+  ungroup() %>%
+  arrange( desc( mn ))
 
 
-df_intersect %>%
-  count(pin, sort=TRUE) 
-
-df_intersect %>%
-  count(pin, spr, sort=TRUE) 
-
-
-
-df_intersect %>% 
-  filter( pin=="06107781069")   
 
 ```
