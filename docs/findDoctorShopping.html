@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dennis Wollersheim and Stephen Callinan" />
+
+
+<title>Find Doctor Shopping</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">misuse</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Find Doctor Shopping</h1>
+<h4 class="author"><em>Dennis Wollersheim and Stephen Callinan</em></h4>
+<h4 class="date"><em>11.07.2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-09-07</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180831)</code> </summary></p>
+<p>The command <code>set.seed(20180831)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 145bd00 </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    data/opioid_full.csv
+    Ignored:    data/opioid_people_full.csv
+    Ignored:    explore/
+
+Unstaged changes:
+    Modified:   analysis/findDoctorShopping.Rmd
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+145bd00
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-08-31
+</td>
+<td style="text-align:left;">
+Initial _rr analysis with interval join
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+
+<div id="motivation" class="section level1">
+<h1>motivation</h1>
+<p>Get all</p>
+<pre class="r"><code>intersect_filename = &#39;data/df_intersect.rda&#39;
+
+source(&#39;lib/functions.R&#39;)
+source( &quot;lib/get_data.R&quot;)
+# -------------------------------------------------
+
+
+
+my_db_get_query ( &quot; 
+      select pin, spply_dt, pbs_code, pbs_rgltn24_adjst_qty as quantity
+      from pbs_rr 
+      JOIN pbs_item pi USING (pbs_code) 
+      WHERE pi.atc_code LIKE &#39;N02A%&#39; &quot;) %&gt;%
+  as.tibble() %&gt;% 
+  { . } -&gt; df_opioid
+
+my_db_get_query ( &quot; select * from patient_rr &quot;) %&gt;%
+  as.tibble() %&gt;% 
+  mutate( age = 2004 - yob , 
+         age_group=cut( age, breaks=0:6*20 )) %&gt;%
+  { . } -&gt; df_people
+
+
+my_db_get_query ( &quot; 
+            select pin, date_of_service as spply_dt, spr, spr_rsp, rpr
+            from mbs_rr where item in (
+                    select item
+                    from mbs_rr JOIN mbs_desc_latest USING (item)
+                    where description like &#39;%attendance%&#39;
+                    group by 1
+                    order by count(*) desc
+                    limit 20
+            )&quot;) %&gt;%
+  as.tibble() %&gt;% 
+  { . } -&gt; df_mbs
+
+
+
+if (file.exists( intersect_filename )) {
+  load( intersect_filename, verbose=TRUE )
+} else {
+  #
+
+  df_opioid %&gt;%
+    group_by(pin) %&gt;%
+    mutate( end_date = spply_dt + 7,
+           start_date = spply_dt - 7) %&gt;%
+    select( pin, pbs_code, quantity, spply_dt, start_date, end_date) %&gt;% 
+    nest( pbs_code, spply_dt, start_date, end_date, quantity, .key=pbs ) %&gt;%
+    { . } -&gt; df_pbs_nested
+
+  #
+  df_mbs %&gt;%
+    group_by(pin) %&gt;%
+    mutate( end_date = spply_dt + 7,
+           start_date = spply_dt - 7) %&gt;%
+     select( pin, spr, spply_dt, start_date, end_date) %&gt;% 
+    nest( spr, spply_dt, start_date, end_date, .key=mbs ) %&gt;%
+    { . } -&gt; df_mbs_nested
+  #
+
+  no_cores &lt;- detectCores() - 1
+  cluster &lt;- create_cluster(no_cores)
+
+  df_mbs_nested %&gt;%
+    inner_join( df_pbs_nested ) %&gt;% 
+    partition(pin, cluster=cluster )  %&gt;%
+    { . } -&gt; df_both
+  #
+  cluster_library(df_both, c(&quot;tidyverse&quot;, &quot;IRanges&quot;, &quot;fuzzyjoin&quot;))
+  #
+
+  df_both %&gt;%
+    do( joined = interval_inner_join( data.frame(.$mbs), 
+                                     data.frame(.$pbs), 
+                                     by=c(&#39;start_date&#39;,&#39;end_date&#39;) ))  %&gt;%
+  collect() %&gt;%
+  ungroup() %&gt;%
+  unnest() %&gt;% 
+  { . } -&gt; df_intersect
+#
+
+save(df_intersect, file=intersect_filename)
+
+}</code></pre>
+</div>
+<div id="analysis---number-of-intersecting" class="section level1">
+<h1>analysis - number of intersecting</h1>
+<pre class="r"><code>df_intersect %&gt;%
+  count( pin, spr ) %&gt;%
+  count( pin, sort=TRUE ) %&gt;%
+  ggplot( aes( pin, nn ) ) + geom_col()</code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df_intersect %&gt;%
+  count(pin, sort=TRUE) </code></pre>
+<pre><code># A tibble: 33 x 2
+   pin             n
+   &lt;chr&gt;       &lt;int&gt;
+ 1 06107781069   255
+ 2 06993510041   246
+ 3 03774643479   212
+ 4 09623773491   119
+ 5 04606387777   108
+ 6 00768348391    94
+ 7 07242243679    87
+ 8 09164365524    74
+ 9 05024418576    45
+10 00329081500    42
+# ... with 23 more rows</code></pre>
+<pre class="r"><code>df_intersect %&gt;%
+  count(pin, spr, sort=TRUE) </code></pre>
+<pre><code># A tibble: 166 x 3
+   pin         spr           n
+   &lt;chr&gt;       &lt;chr&gt;     &lt;int&gt;
+ 1 06993510041 043548836   150
+ 2 03774643479 098440553   111
+ 3 07242243679 003376718    87
+ 4 03774643479 080655179    84
+ 5 09623773491 077403346    80
+ 6 04606387777 071837344    74
+ 7 00768348391 019215297    62
+ 8 06107781069 015064182    62
+ 9 00329081500 041154489    42
+10 06107781069 042904384    38
+# ... with 156 more rows</code></pre>
+<pre class="r"><code>df_intersect %&gt;% 
+  filter( pin==&quot;06107781069&quot;)   </code></pre>
+<pre><code># A tibble: 255 x 10
+   pin   spr   spply_dt.x start_date.x end_date.x pbs_code spply_dt.y
+   &lt;chr&gt; &lt;chr&gt; &lt;date&gt;     &lt;date&gt;       &lt;date&gt;     &lt;chr&gt;    &lt;date&gt;    
+ 1 0610… 0150… 2012-11-21 2012-11-14   2012-11-28 08866P   2012-11-08
+ 2 0610… 0150… 2012-11-21 2012-11-14   2012-11-28 08866P   2012-11-23
+ 3 0610… 0150… 2012-11-21 2012-11-14   2012-11-28 08866P   2012-11-29
+ 4 0610… 0143… 2012-12-05 2012-11-28   2012-12-12 08866P   2012-11-23
+ 5 0610… 0143… 2012-12-05 2012-11-28   2012-12-12 08866P   2012-11-29
+ 6 0610… 0284… 2012-11-15 2012-11-08   2012-11-22 08866P   2012-11-08
+ 7 0610… 0284… 2012-11-15 2012-11-08   2012-11-22 08866P   2012-11-23
+ 8 0610… 0284… 2012-11-15 2012-11-08   2012-11-22 08866P   2012-11-29
+ 9 0610… 0568… 2012-03-14 2012-03-07   2012-03-21 08523N   2012-03-28
+10 0610… 0568… 2012-03-14 2012-03-07   2012-03-21 08611F   2012-03-07
+# ... with 245 more rows, and 3 more variables: start_date.y &lt;date&gt;,
+#   end_date.y &lt;date&gt;, quantity &lt;int&gt;</code></pre>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.4 (2018-03-15)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 17.10
+
+Matrix products: default
+BLAS: /usr/lib/x86_64-linux-gnu/openblas/libblas.so.3
+LAPACK: /usr/lib/x86_64-linux-gnu/libopenblasp-r0.2.20.so
+
+locale:
+ [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8    
+ [5] LC_MONETARY=en_AU.UTF-8    LC_MESSAGES=en_AU.UTF-8   
+ [7] LC_PAPER=en_AU.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] fuzzyjoin_0.1.4       bindrcpp_0.2.2        keyring_1.1.0        
+ [4] RPostgreSQL_0.6-2     DBI_1.0.0             forcats_0.3.0        
+ [7] dplyr_0.7.6           purrr_0.2.5           readr_1.1.1          
+[10] tidyr_0.8.1           tibble_1.4.2          ggplot2_2.2.1        
+[13] tidyverse_1.2.1       multidplyr_0.0.0.9000 IRanges_2.12.0       
+[16] S4Vectors_0.16.0      BiocGenerics_0.24.0   lubridate_1.7.4      
+[19] workflowr_1.1.1       pander_0.6.2          kableExtra_0.9.0     
+[22] knitr_1.20            stringr_1.3.1         wrapr_1.5.1          
+[25] nvimcom_0.9-75       
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.18      lattice_0.20-35   utf8_1.1.4       
+ [4] assertthat_0.2.0  rprojroot_1.3-2   digest_0.6.15    
+ [7] R6_2.2.2          cellranger_1.1.0  plyr_1.8.4       
+[10] backports_1.1.2   evaluate_0.10.1   httr_1.3.1       
+[13] pillar_1.3.0      rlang_0.2.1       lazyeval_0.2.1   
+[16] readxl_1.1.0      rstudioapi_0.7    whisker_0.3-2    
+[19] R.utils_2.6.0     R.oo_1.22.0       rmarkdown_1.10   
+[22] labeling_0.3      munsell_0.5.0     broom_0.5.0      
+[25] compiler_3.4.4    modelr_0.1.2      pkgconfig_2.0.1  
+[28] htmltools_0.3.6   tidyselect_0.2.4  fansi_0.2.3      
+[31] viridisLite_0.3.0 crayon_1.3.4      R.methodsS3_1.7.1
+[34] grid_3.4.4        nlme_3.1-137      jsonlite_1.5     
+[37] gtable_0.2.0      git2r_0.23.0      magrittr_1.5     
+[40] scales_0.5.0      cli_1.0.0         stringi_1.2.3    
+[43] xml2_1.2.0        tools_3.4.4       glue_1.3.0       
+[46] hms_0.4.2         yaml_2.1.19       colorspace_1.3-2 
+[49] rvest_0.3.2       bindr_0.1.1       haven_1.1.2      </code></pre>
+</div>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

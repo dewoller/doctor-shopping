@@ -101,10 +101,28 @@ if (file.exists( intersect_filename )) {
 
 save(df_intersect, file=intersect_filename)
 
+}
+```
+
+# analysis - number of intersecting
+
+```{r analysis}
+
 df_intersect %>%
   count( pin, spr ) %>%
-  count( pin, sort=TRUE )
+  count( pin, sort=TRUE ) %>%
+  ggplot( aes( pin, nn ) ) + geom_col()
 
-}
+
+df_intersect %>%
+  count(pin, sort=TRUE) 
+
+df_intersect %>%
+  count(pin, spr, sort=TRUE) 
 
 
+
+df_intersect %>% 
+  filter( pin=="06107781069")   
+
+```
