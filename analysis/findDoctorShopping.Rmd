@@ -18,6 +18,9 @@ Get all
 ```{r results='hide', message=FALSE, warning=FALSE}
 
 intersect_filename = 'data/df_intersect.rda'
+data_source_suffix='_rr'
+data_source_suffix=''
+
 
 source('lib/functions.R')
 source( "lib/get_data.R")
@@ -25,31 +28,31 @@ source( "lib/get_data.R")
 
 
 
-my_db_get_query ( " 
+my_db_get_query ( paste0( " 
       select pin, spply_dt, pbs_code, pbs_rgltn24_adjst_qty as quantity
-      from pbs_rr 
+      from pbs", data_source_suffix, " 
       JOIN pbs_item pi USING (pbs_code) 
-      WHERE pi.atc_code LIKE 'N02A%' ") %>%
+      WHERE pi.atc_code LIKE 'N02A%' ")) %>%
   as.tibble() %>% 
   { . } -> df_opioid
 
-my_db_get_query ( " select * from patient_rr ") %>%
+my_db_get_query ( paste0( " select * from patient", data_source_suffix)) %>%
   as.tibble() %>% 
   mutate( age = 2004 - yob , 
          age_group=cut( age, breaks=0:6*20 )) %>%
   { . } -> df_people
 
 
-my_db_get_query ( " 
+my_db_get_query ( paste0( " 
             select pin, date_of_service as spply_dt, spr, spr_rsp, rpr
-            from mbs_rr where item in (
+            from mbs", data_source_suffix, " where item in (
                     select item
-                    from mbs_rr JOIN mbs_desc_latest USING (item)
+                    from mbs", data_source_suffix, " JOIN mbs_desc_latest USING (item)
                     where description like '%attendance%'
                     group by 1
                     order by count(*) desc
                     limit 20
-            )") %>%
+            )")) %>%
   as.tibble() %>% 
   { . } -> df_mbs
 

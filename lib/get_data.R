@@ -21,7 +21,7 @@ my_dbWriteTable <- function ( df, table_name ) {
   drv <- dbDriver("PostgreSQL")
   con <- dbConnect(drv, dbname = "him5ihc_pbs",
           host = "localhost", port = 5432,
-          user = "dewoller", password = key_get('mofi', 'dewoller'))
+          user = "dewoller", password = Sys.getenv('PASSWD'))
   on.exit(dbDisconnect(con))
   dbWriteTable( con, table_name, df )
 }
@@ -34,7 +34,7 @@ my_db_get_query <- function ( query, .host="localhost"  ) {
   drv <- dbDriver("PostgreSQL")
   con <- dbConnect(drv, dbname = "him5ihc_pbs",
           host = .host, port = 5432,
-          user = "dewoller", password = key_get('mofi', 'dewoller'))
+          user = "dewoller", password = Sys.getenv('PASSWD'))
   on.exit(dbDisconnect(con))
   dbGetQuery( con, query )
 
