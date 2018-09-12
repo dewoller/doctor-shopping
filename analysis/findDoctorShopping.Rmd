@@ -17,10 +17,10 @@ Get all
 
 ```{r results='hide', message=FALSE, warning=FALSE}
 
-intersect_filename = 'data/df_intersect.rda'
-data_source_suffix='_rr'
 data_source_suffix=''
+data_source_suffix='_rr'
 
+intersect_filename = paste0( 'data/df_intersect', data_source_suffix, '.rda')
 
 source('lib/functions.R')
 source( "lib/get_data.R")
@@ -89,6 +89,15 @@ find_multi_script_group <- function  (supply_date, ndays ) {
 }
 
 
+```
+
+ 1) find contiguious and/or overlapping multi drug episodes
+ 2) find the doctor consults within that period
+ 3) create df_intersect, containing every intersection of the entire multi script episode with any doctor consults
+
+```{r}
+
+
 
 
 if (file.exists( intersect_filename )) {
@@ -110,12 +119,16 @@ if (file.exists( intersect_filename )) {
     filter( nscripts > 1 ) %>% 
     { . } -> df_pbs_multi_groups
 
+
 df_pbs_multi_groups  %>%
-    group_by( pin, group ) %>%
+    group_by( pin, group, nscripts ) %>%
     summarise( start_date = min( spply_dt ) - 7, 
-              end_date = max( spply_dt ) ) %>%
-    select( pin,  start_date, end_date, group) %>% 
-    nest( start_date, end_date,  group, .key=pbs ) %>%
+              end_date = max( spply_dt ),
+              quantity = sum(quantity)
+              ) %>%
+    group_by( pin ) %>%
+    select( pin,  start_date, end_date, group, quantity, nscripts) %>% 
+    nest( start_date, end_date,  group, quantity, nscripts, .key=pbs ) %>%
     { . } -> df_pbs_nested
 
   #
@@ -130,7 +143,7 @@ df_pbs_multi_groups  %>%
 
   no_cores <- detectCores() - 1
   cluster <- create_cluster(no_cores)
-
+#
   df_mbs_nested %>%
     inner_join( df_pbs_nested ) %>% 
     partition(pin, cluster=cluster )  %>%
@@ -147,24 +160,57 @@ df_pbs_multi_groups  %>%
   ungroup() %>%
   unnest() %>% 
   { . } -> df_intersect
+
 #
 
 save(df_intersect, file=intersect_filename)
 
 }
+
 ```
 
-# analysis - number of intersecting
+# analysis - number of distinct practicioners for each period the period
 
-```{r analysis}
+```{r analysis1}
 
 df_intersect %>%
-  count( pin, spr) %>%
-  group_by( pin ) %>%
-  summarise( mn = mean( n ) ) %>%
+  group_by( pin, spr ) %>%
+  summarise( pills = sum( n ), nsegments = n() ) %>%
   ungroup() %>%
   arrange( desc( mn ))
 
 
+```
+
+# analysis - number of distinct practicioners over the period
+
+```{r analysis2}
+
+df_intersect %>%
+  mutate( ndays = end_date.y - start_date.y ) %>%
+  filter( ndays < 2000 ) %>%
+  group_by( pin, group, ndays ) %>%
+  distinct( spr ) %>%
+  count() %>%
+  mutate( days_per_spr = ndays / n ) %>%
+  arrange( desc( n )) %>%
+  ggplot( aes( n, days_per_spr, color= log(as.numeric( ndays ) )) ) + 
+  geom_point() +
+  xlab( "Number of distinct SPR" ) +
+  ylab( "Days per distinct SPR" ) 
+
+
+```
+
+# analysis - number of distinct practicioners over the period
+
+```{r analysis3}
+
+
+```
+
+# analysis - number of distinct practicioners over the period
+
+```{r analysis4}
 
 ```

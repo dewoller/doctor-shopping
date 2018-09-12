@@ -322,12 +322,11 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-09-07</p>
+<p><strong>Last updated:</strong> 2018-09-12</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
-<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
 </details>
 </li>
 <li>
@@ -346,13 +345,18 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/dewoller/doctor-shopping/tree/b134b101269a95f71e2c4be646daa6329d684a5e" target="_blank">b134b10</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/dewoller/doctor-shopping/tree/4bc4137fd2f01393034c30b03c880b2148bd7269" target="_blank">4bc4137</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
     Ignored:    data/opioid_full.csv
     Ignored:    data/opioid_people_full.csv
+    Ignored:    docs/figure/
     Ignored:    explore/
+
+Unstaged changes:
+    Modified:   analysis/findDoctorShopping.Rmd
+    Deleted:    data/df_intersect.rda
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -381,6 +385,57 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/4bc4137fd2f01393034c30b03c880b2148bd7269/analysis/findDoctorShopping.Rmd" target="_blank">4bc4137</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+Merge branch ‘master’ of github.com:dewoller/doctor-shopping
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/128690ee985cd9a819bfe0d28737a34b3260cc97/analysis/findDoctorShopping.Rmd" target="_blank">128690e</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+localisation to hermoine
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/dewoller/doctor-shopping/f81be927331f1426ff81b71f6c94860780e2eff6/docs/findDoctorShopping.html" target="_blank">f81be92</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -459,6 +514,9 @@ Initial _rr analysis with interval join
 <h1>motivation</h1>
 <p>Get all</p>
 <pre class="r"><code>intersect_filename = &#39;data/df_intersect.rda&#39;
+data_source_suffix=&#39;&#39;
+data_source_suffix=&#39;_rr&#39;
+
 
 source(&#39;lib/functions.R&#39;)
 source( &quot;lib/get_data.R&quot;)
@@ -466,31 +524,31 @@ source( &quot;lib/get_data.R&quot;)
 
 
 
-my_db_get_query ( &quot; 
+my_db_get_query ( paste0( &quot; 
       select pin, spply_dt, pbs_code, pbs_rgltn24_adjst_qty as quantity
-      from pbs_rr 
+      from pbs&quot;, data_source_suffix, &quot; 
       JOIN pbs_item pi USING (pbs_code) 
-      WHERE pi.atc_code LIKE &#39;N02A%&#39; &quot;) %&gt;%
+      WHERE pi.atc_code LIKE &#39;N02A%&#39; &quot;)) %&gt;%
   as.tibble() %&gt;% 
   { . } -&gt; df_pbs
 
-my_db_get_query ( &quot; select * from patient_rr &quot;) %&gt;%
+my_db_get_query ( paste0( &quot; select * from patient&quot;, data_source_suffix)) %&gt;%
   as.tibble() %&gt;% 
   mutate( age = 2004 - yob , 
          age_group=cut( age, breaks=0:6*20 )) %&gt;%
   { . } -&gt; df_people
 
 
-my_db_get_query ( &quot; 
+my_db_get_query ( paste0( &quot; 
             select pin, date_of_service as spply_dt, spr, spr_rsp, rpr
-            from mbs_rr where item in (
+            from mbs&quot;, data_source_suffix, &quot; where item in (
                     select item
-                    from mbs_rr JOIN mbs_desc_latest USING (item)
+                    from mbs&quot;, data_source_suffix, &quot; JOIN mbs_desc_latest USING (item)
                     where description like &#39;%attendance%&#39;
                     group by 1
                     order by count(*) desc
                     limit 20
-            )&quot;) %&gt;%
+            )&quot;)) %&gt;%
   as.tibble() %&gt;% 
   { . } -&gt; df_mbs</code></pre>
 </div>
@@ -521,12 +579,13 @@ my_db_get_query ( &quot;
     group_id = group_id + 1
   }
   rv
-}
-
-
-
-
-if (file.exists( intersect_filename )) {
+}</code></pre>
+<ol style="list-style-type: decimal">
+<li>find contiguious and/or overlapping multi drug episodes</li>
+<li>find the doctor consults within that period</li>
+<li>create df_intersect, containing every intersection of the entire multi script episode with any doctor consults</li>
+</ol>
+<pre class="r"><code>if (file.exists( intersect_filename )) {
   load( intersect_filename, verbose=TRUE )
 } else {
   #
@@ -544,6 +603,7 @@ if (file.exists( intersect_filename )) {
            nscripts = n()) %&gt;%
     filter( nscripts &gt; 1 ) %&gt;% 
     { . } -&gt; df_pbs_multi_groups
+
 
 df_pbs_multi_groups  %&gt;%
     group_by( pin, group ) %&gt;%
@@ -565,7 +625,7 @@ df_pbs_multi_groups  %&gt;%
 
   no_cores &lt;- detectCores() - 1
   cluster &lt;- create_cluster(no_cores)
-
+#
   df_mbs_nested %&gt;%
     inner_join( df_pbs_nested ) %&gt;% 
     partition(pin, cluster=cluster )  %&gt;%
@@ -582,36 +642,121 @@ df_pbs_multi_groups  %&gt;%
   ungroup() %&gt;%
   unnest() %&gt;% 
   { . } -&gt; df_intersect
+
 #
 
 save(df_intersect, file=intersect_filename)
 
 }</code></pre>
-<pre><code>Loading objects:
-  df_intersect</code></pre>
+<pre><code>Initialising 3 core cluster.</code></pre>
+<pre><code>Joining, by = &quot;pin&quot;</code></pre>
+<pre><code>Warning: group_indices_.grouped_df ignores extra arguments</code></pre>
+<pre><code>Warning: Grouping rowwise data frame strips rowwise nature</code></pre>
 </div>
-<div id="analysis---number-of-intersecting" class="section level1">
-<h1>analysis - number of intersecting</h1>
+<div id="analysis---mean-number-of-distinct-practicioners-for-each-period-the-period" class="section level1">
+<h1>analysis - mean number of distinct practicioners for each period the period</h1>
 <pre class="r"><code>df_intersect %&gt;%
-  count( pin, spr) %&gt;%
   group_by( pin ) %&gt;%
-  summarise( mn = mean( n ) ) %&gt;%
+  summarise( mn = mean( n ), nsegments = n() ) %&gt;%
   ungroup() %&gt;%
   arrange( desc( mn ))</code></pre>
-<pre><code># A tibble: 33 x 2
-   pin            mn
-   &lt;chr&gt;       &lt;dbl&gt;
- 1 07242243679 87   
- 2 00329081500 42   
- 3 03774643479 35.3 
- 4 09623773491 14.9 
- 5 06107781069 12.1 
- 6 06993510041 11.2 
- 7 02560075027 10.2 
- 8 00768348391  9.4 
- 9 09164365524  9.25
-10 04606387777  8.31
-# ... with 23 more rows</code></pre>
+<pre><code>Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA
+
+Warning in mean.default(n): argument is not numeric or logical: returning
+NA</code></pre>
+<pre><code># A tibble: 18 x 3
+   pin            mn nsegments
+   &lt;chr&gt;       &lt;dbl&gt;     &lt;int&gt;
+ 1 00329081500    NA        10
+ 2 00768348391    NA        97
+ 3 02560075027    NA        15
+ 4 03729326282    NA         2
+ 5 03774643479    NA       145
+ 6 04606387777    NA        33
+ 7 04916955816    NA         3
+ 8 04983298163    NA         8
+ 9 05024418576    NA        15
+10 05315700672    NA         2
+11 06107781069    NA        46
+12 06443562600    NA        12
+13 06993510041    NA        84
+14 07242243679    NA        26
+15 08930988106    NA         2
+16 09085405338    NA         5
+17 09164365524    NA        23
+18 09623773491    NA        38</code></pre>
+</div>
+<div id="analysis---number-of-distinct-practicioners-over-the-period" class="section level1">
+<h1>analysis - number of distinct practicioners over the period</h1>
+<pre class="r"><code>df_intersect %&gt;%
+  mutate( ndays = end_date.y - start_date.y ) %&gt;%
+  filter( ndays &lt; 2000 ) %&gt;%
+  group_by( pin, group, ndays ) %&gt;%
+  distinct( spr ) %&gt;%
+  count() %&gt;%
+  mutate( days_per_spr = ndays / n ) %&gt;%
+  arrange( desc( n )) %&gt;%
+  ggplot( aes( n, days_per_spr, color= log(as.numeric( ndays ) )) ) + 
+  geom_point() +
+  xlab( &quot;Number of distinct SPR&quot; ) +
+  ylab( &quot;Days per distinct SPR&quot; ) </code></pre>
+<pre><code>Don&#39;t know how to automatically pick scale for object of type difftime. Defaulting to continuous.</code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="analysis---number-of-distinct-practicioners-over-the-period-1" class="section level1">
+<h1>analysis - number of distinct practicioners over the period</h1>
+</div>
+<div id="analysis---number-of-distinct-practicioners-over-the-period-2" class="section level1">
+<h1>analysis - number of distinct practicioners over the period</h1>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre class="r"><code>sessionInfo()</code></pre>
@@ -636,14 +781,15 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] bindrcpp_0.2.2        keyring_1.1.0         RPostgreSQL_0.6-2    
- [4] DBI_1.0.0             forcats_0.3.0         dplyr_0.7.6          
- [7] purrr_0.2.5           readr_1.1.1           tidyr_0.8.1          
-[10] tibble_1.4.2          ggplot2_2.2.1         tidyverse_1.2.1      
-[13] multidplyr_0.0.0.9000 IRanges_2.12.0        S4Vectors_0.16.0     
-[16] BiocGenerics_0.24.0   lubridate_1.7.4       workflowr_1.1.1      
-[19] pander_0.6.2          kableExtra_0.9.0      knitr_1.20           
-[22] stringr_1.3.1         wrapr_1.5.1           nvimcom_0.9-75       
+ [1] fuzzyjoin_0.1.4       bindrcpp_0.2.2        keyring_1.1.0        
+ [4] RPostgreSQL_0.6-2     DBI_1.0.0             forcats_0.3.0        
+ [7] dplyr_0.7.6           purrr_0.2.5           readr_1.1.1          
+[10] tidyr_0.8.1           tibble_1.4.2          ggplot2_2.2.1        
+[13] tidyverse_1.2.1       multidplyr_0.0.0.9000 IRanges_2.12.0       
+[16] S4Vectors_0.16.0      BiocGenerics_0.24.0   lubridate_1.7.4      
+[19] workflowr_1.1.1       pander_0.6.2          kableExtra_0.9.0     
+[22] knitr_1.20            stringr_1.3.1         wrapr_1.5.1          
+[25] nvimcom_0.9-75       
 
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.18      lattice_0.20-35   utf8_1.1.4       
@@ -653,16 +799,16 @@ loaded via a namespace (and not attached):
 [13] pillar_1.3.0      rlang_0.2.1       lazyeval_0.2.1   
 [16] readxl_1.1.0      rstudioapi_0.7    whisker_0.3-2    
 [19] R.utils_2.6.0     R.oo_1.22.0       rmarkdown_1.10   
-[22] munsell_0.5.0     broom_0.5.0       compiler_3.4.4   
-[25] modelr_0.1.2      pkgconfig_2.0.1   htmltools_0.3.6  
-[28] tidyselect_0.2.4  fansi_0.2.3       viridisLite_0.3.0
-[31] crayon_1.3.4      R.methodsS3_1.7.1 grid_3.4.4       
-[34] nlme_3.1-137      jsonlite_1.5      gtable_0.2.0     
-[37] git2r_0.23.0      magrittr_1.5      scales_0.5.0     
-[40] cli_1.0.0         stringi_1.2.3     xml2_1.2.0       
-[43] tools_3.4.4       glue_1.3.0        hms_0.4.2        
-[46] yaml_2.1.19       colorspace_1.3-2  rvest_0.3.2      
-[49] bindr_0.1.1       haven_1.1.2      </code></pre>
+[22] labeling_0.3      munsell_0.5.0     broom_0.5.0      
+[25] compiler_3.4.4    modelr_0.1.2      pkgconfig_2.0.1  
+[28] htmltools_0.3.6   tidyselect_0.2.4  fansi_0.2.3      
+[31] viridisLite_0.3.0 crayon_1.3.4      R.methodsS3_1.7.1
+[34] grid_3.4.4        nlme_3.1-137      jsonlite_1.5     
+[37] gtable_0.2.0      git2r_0.23.0      magrittr_1.5     
+[40] scales_0.5.0      cli_1.0.0         stringi_1.2.3    
+[43] xml2_1.2.0        tools_3.4.4       glue_1.3.0       
+[46] hms_0.4.2         yaml_2.1.19       colorspace_1.3-2 
+[49] rvest_0.3.2       bindr_0.1.1       haven_1.1.2      </code></pre>
 </div>
 </div>
 
