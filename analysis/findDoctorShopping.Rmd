@@ -11,9 +11,13 @@ pdf_document:
 
 \tableofcontents
 
-# motivation 
 
-Get all 
+Try to find the doctor shoppers from within the pbs
+
+## algorithm
+  - find overlapping scripts
+  - find multiple prescribers within 2 weeks of overlap
+
 
 ```{r results='hide', message=FALSE, warning=FALSE}
 
@@ -169,15 +173,23 @@ save(df_intersect, file=intersect_filename)
 
 ```
 
-# analysis - number of distinct practicioners for each period the period
+# analysis - number of distinct practicioners for each period
+Greater than 2 distinct practicioners, less than 10 days per practicioner, greater than 1 scripts
 
 ```{r analysis1}
 
 df_intersect %>%
-  group_by( pin, spr ) %>%
-  summarise( pills = sum( n ), nsegments = n() ) %>%
-  ungroup() %>%
-  arrange( desc( mn ))
+  mutate( ndays = end_date.y - start_date.y ) %>%
+  filter( ndays < 2000 ) %>%
+  group_by( pin, group, ndays, nscripts ) %>%
+  distinct( spr ) %>%
+  count( sort=TRUE) %>%
+  rename( distinct_spr_n = n ) %>%
+  mutate( days_per_spr = ndays / distinct_spr_n) %>%
+  arrange( days_per_spr) %>%
+  filter( distinct_spr_n >= 2 & days_per_spr < 10  & nscripts >= 2 ) %>%
+  group_by( pin ) %>%
+  count()
 
 
 ```
