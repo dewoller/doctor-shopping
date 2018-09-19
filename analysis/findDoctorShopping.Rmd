@@ -17,8 +17,8 @@ Get all
 
 ```{r results='hide', message=FALSE, warning=FALSE}
 
-data_source_suffix=''
 data_source_suffix='_rr'
+data_source_suffix=''
 
 intersect_filename = paste0( 'data/df_intersect', data_source_suffix, '.rda')
 
@@ -45,14 +45,21 @@ my_db_get_query ( paste0( " select * from patient", data_source_suffix)) %>%
 
 my_db_get_query ( paste0( " 
             select pin, date_of_service as spply_dt, spr, spr_rsp, rpr
-            from mbs", data_source_suffix, " where item in (
+            from mbs", data_source_suffix, 
+            " where item in (
                     select item
-                    from mbs", data_source_suffix, " JOIN mbs_desc_latest USING (item)
+                    from mbs_rr JOIN mbs_desc_latest USING (item)
                     where description like '%attendance%'
                     group by 1
                     order by count(*) desc
                     limit 20
-            )")) %>%
+            ) AND
+            pin in (
+            select pin
+            from pbs", data_source_suffix, " 
+            JOIN pbs_item pi USING (pbs_code) 
+            WHERE pi.atc_code LIKE 'N02A%') 
+  ")) %>%
   as.tibble() %>% 
   { . } -> df_mbs
 
@@ -118,9 +125,9 @@ if (file.exists( intersect_filename )) {
            nscripts = n()) %>%
     filter( nscripts > 1 ) %>% 
     { . } -> df_pbs_multi_groups
-
-
-df_pbs_multi_groups  %>%
+  #
+  #
+  df_pbs_multi_groups  %>%
     group_by( pin, group, nscripts ) %>%
     summarise( start_date = min( spply_dt ) - 7, 
               end_date = max( spply_dt ),
@@ -130,7 +137,7 @@ df_pbs_multi_groups  %>%
     select( pin,  start_date, end_date, group, quantity, nscripts) %>% 
     nest( start_date, end_date,  group, quantity, nscripts, .key=pbs ) %>%
     { . } -> df_pbs_nested
-
+  #
   #
   df_mbs %>%
     group_by(pin) %>%
@@ -140,10 +147,10 @@ df_pbs_multi_groups  %>%
     nest( spr, spply_dt, start_date, end_date, .key=mbs ) %>%
     { . } -> df_mbs_nested
   #
-
+  #
   no_cores <- detectCores() - 1
   cluster <- create_cluster(no_cores)
-#
+  #
   df_mbs_nested %>%
     inner_join( df_pbs_nested ) %>% 
     partition(pin, cluster=cluster )  %>%
@@ -151,7 +158,7 @@ df_pbs_multi_groups  %>%
   #
   cluster_library(df_both, c("tidyverse", "IRanges", "fuzzyjoin"))
   #
-
+  #
   df_both %>%
     do( joined = interval_inner_join( data.frame(.$mbs), 
                                      data.frame(.$pbs), 
@@ -160,10 +167,10 @@ df_pbs_multi_groups  %>%
   ungroup() %>%
   unnest() %>% 
   { . } -> df_intersect
-
-#
-
-save(df_intersect, file=intersect_filename)
+  #
+  #
+  #
+  save(df_intersect, file=intersect_filename)
 
 }
 
