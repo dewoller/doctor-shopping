@@ -44,7 +44,7 @@ my_db_get_query ( paste0( "
 my_db_get_query ( paste0( " select * from patient", data_source_suffix)) %>%
   as.tibble() %>% 
   mutate( age = 2004 - yob , 
-         age_group=cut( age, breaks=0:6*20 )) %>%
+         age_group=cut( age, breaks=0:12*10 )) %>%
   { . } -> df_people
 
 
@@ -194,7 +194,10 @@ df_intersect %>%
   count() %>% 
   { . } -> df_doctor_shoppers
 
-1
+
+df_doctor_shoppers %>%
+  inner_join( df_people ) %>% 
+  { . } -> df_doctor_shoppers
 
 df_intersect %>%
   mutate( ndays = end_date.y - start_date.y ) %>%
@@ -205,56 +208,68 @@ df_intersect %>%
 
 
 df_doctor_shoppers %>%
-  inner_join( df_people ) %>%
-  ggplot( aes( sex )) +
+  ggplot( aes( sex, fill=sex )) +
   geom_bar()
 
 df_doctor_shoppers %>%
-  inner_join( df_people ) %>%
   ggplot( aes(age_group, fill=sex )) +
   geom_bar()
 
+df_doctor_shoppers %>%
+  ggplot( aes(age_group, fill=sex )) +
+  geom_bar( position='dodge') 
+
 
 df_doctor_shoppers %>%
-  inner_join( df_people ) %>%
-  ggplot( aes( sex, yob )) +
+  ggplot( aes( sex, age, fill=sex )) +
   geom_boxplot()
-  
+
+df_doctor_shoppers %>%
+  ggplot( aes( sex, age, fill=sex )) +
+  geom_violin()
 
 
+df_pbs %>%
+  inner_join( df_people ) %>%
+  left_join( df_doctor_shoppers, by='pin') %>%
+  mutate( type = ifelse( is.na(n ), 'use', 'misuse') ) %>% 
+  rename( sex = sex.x, age = age.x, age_group = age_group.x ) %>%
+  { . } -> df_combined
 
 
-```
+df_combined  %>%
+  filter( type=='misuse' ) %>%
+  group_by( pin, sex, age, type ) %>%
+  summarise( quantity = sum( quantity )) %>%
+  ggplot( aes( sex, quantity, fill=sex )) + 
+  geom_violin() 
 
-# analysis - number of distinct practicioners over the period
-
-```{r analysis2}
-
-df_intersect %>%
-  mutate( ndays = end_date.y - start_date.y ) %>%
-  filter( ndays < 2000 ) %>%
-  group_by( pin, group, ndays ) %>%
-  distinct( spr ) %>%
-  count() %>%
-  mutate( days_per_spr = ndays / n ) %>%
-  arrange( desc( n )) %>%
-  ggplot( aes( n, days_per_spr, color= log(as.numeric( ndays ) )) ) + 
-  geom_point() +
-  xlab( "Number of distinct SPR" ) +
-  ylab( "Days per distinct SPR" ) 
-
-
-```
-
-# analysis - number of distinct practicioners over the period
-
-```{r analysis3}
-
+df_combined  %>%
+  filter( type=='misuse' ) %>%
+  group_by( pin, sex, age, type ) %>%
+  summarise( quantity = sum( quantity )) %>%
+  ggplot( aes( sex, quantity, fill=sex )) + 
+  geom_boxplot() +
+  scale_y_log10() + ggtitle ('average pills per person, log scale')
 
 ```
 
-# analysis - number of distinct practicioners over the period
+average number of pills / script
 
-```{r analysis4}
+```{r}
+
+df_combined  %>%
+  filter( type=='misuse' ) %>%
+  group_by( sex ) %>%
+  summarise( quantity = sum( quantity ) / n())
+
+
+df_doctor_shoppers  %>%
+  ggplot( aes( age_group, fill=sex  )) + 
+  geom_histogram(stat='count', position='dodge' ) 
+
+
+
+
 
 ```
