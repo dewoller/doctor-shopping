@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dennis Wollersheim and Stephen Callinan" />
+
+
+<title>Find Doctor Shopping</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">misuse</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Find Doctor Shopping</h1>
+<h4 class="author"><em>Dennis Wollersheim and Stephen Callinan</em></h4>
+<h4 class="date"><em>11.07.2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-09-20</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180831)</code> </summary></p>
+<p>The command <code>set.seed(20180831)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/dewoller/doctor-shopping/tree/9ed62901e69486b7fbdf947c31e51a1176c65351" target="_blank">9ed6290</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    data/opioid_full.csv
+    Ignored:    data/opioid_people_full.csv
+    Ignored:    docs/figure/
+    Ignored:    explore/
+
+Untracked files:
+    Untracked:  data/df_intersect_r.rda
+    Untracked:  lib/doctorShopper.sql
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/9ed62901e69486b7fbdf947c31e51a1176c65351/analysis/findDoctorShopping.Rmd" target="_blank">9ed6290</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-20
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/findDoctorShopping.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/eb25ade4734969271f105603c8a558c257f32dbf/analysis/findDoctorShopping.Rmd" target="_blank">eb25ade</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-20
+</td>
+<td style="text-align:left;">
+final doctor shopper definition dialled
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/0f68509e4426f0b727a50d2c14880b363642bb42/analysis/findDoctorShopping.Rmd" target="_blank">0f68509</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-20
+</td>
+<td style="text-align:left;">
+Merge branch ‘master’ of github.com:dewoller/doctor-shopping
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/206a1fab8ceac31b33f914f1aa28349538f175e9/analysis/findDoctorShopping.Rmd" target="_blank">206a1fa</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-20
+</td>
+<td style="text-align:left;">
+comments and analyis upgrade
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/ba101544fe1dd5f83871fbb74130f821ca4b831d/analysis/findDoctorShopping.Rmd" target="_blank">ba10154</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-20
+</td>
+<td style="text-align:left;">
+push back to dewlap
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/e94da48f8659253e8cf672f0840fb4343f30209a/analysis/findDoctorShopping.Rmd" target="_blank">e94da48</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-12
+</td>
+<td style="text-align:left;">
+try out big at alf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/dewoller/doctor-shopping/e94da48f8659253e8cf672f0840fb4343f30209a/docs/findDoctorShopping.html" target="_blank">e94da48</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-12
+</td>
+<td style="text-align:left;">
+try out big at alf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/dewoller/doctor-shopping/b07d660403a5fae7df46d3cf79aa78509ca537ef/docs/findDoctorShopping.html" target="_blank">b07d660</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/4bc4137fd2f01393034c30b03c880b2148bd7269/analysis/findDoctorShopping.Rmd" target="_blank">4bc4137</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+Merge branch ‘master’ of github.com:dewoller/doctor-shopping
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/128690ee985cd9a819bfe0d28737a34b3260cc97/analysis/findDoctorShopping.Rmd" target="_blank">128690e</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+localisation to hermoine
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/dewoller/doctor-shopping/f81be927331f1426ff81b71f6c94860780e2eff6/docs/findDoctorShopping.html" target="_blank">f81be92</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/b134b101269a95f71e2c4be646daa6329d684a5e/analysis/findDoctorShopping.Rmd" target="_blank">b134b10</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/findDoctorShopping.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/6f0e63b5466ed9f1d46462e245dbe9912d42e7b2/analysis/findDoctorShopping.Rmd" target="_blank">6f0e63b</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+initial commit
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/dewoller/doctor-shopping/6f0e63b5466ed9f1d46462e245dbe9912d42e7b2/docs/findDoctorShopping.html" target="_blank">6f0e63b</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-09-07
+</td>
+<td style="text-align:left;">
+initial commit
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/doctor-shopping/blob/145bd0093329bbea9e2f909b9063c70c3c8eddbc/analysis/findDoctorShopping.Rmd" target="_blank">145bd00</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-08-31
+</td>
+<td style="text-align:left;">
+Initial _rr analysis with interval join
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+
+<p>Try to find the doctor shoppers from within the pbs</p>
+<div id="algorithm" class="section level2">
+<h2>algorithm</h2>
+<ul>
+<li>find overlapping scripts</li>
+<li>find multiple prescribers within 2 weeks of overlap</li>
+</ul>
+<pre class="r"><code>data_source_suffix=&#39;&#39;
+data_source_suffix=&#39;_rr&#39;
+data_source_suffix=&#39;_r&#39;
+
+intersect_filename = paste0( &#39;data/df_intersect&#39;, data_source_suffix, &#39;.rda&#39;)
+
+source(&#39;lib/functions.R&#39;)
+source( &quot;lib/get_data.R&quot;)
+# -------------------------------------------------
+
+
+
+my_db_get_query ( paste0( &quot; 
+      select pin, spply_dt, pbs_code, pbs_rgltn24_adjst_qty as quantity
+      from pbs&quot;, data_source_suffix, &quot; 
+      JOIN pbs_item pi USING (pbs_code) 
+      WHERE pi.atc_code LIKE &#39;N02A%&#39; &quot;)) %&gt;%
+  as.tibble() %&gt;% 
+  { . } -&gt; df_pbs
+
+my_db_get_query ( paste0( &quot; select * from patient&quot;, data_source_suffix)) %&gt;%
+  as.tibble() %&gt;% 
+  mutate( age = 2004 - yob , 
+         age_group=cut( age, breaks=0:12*10 )) %&gt;%
+  { . } -&gt; df_people
+
+
+my_db_get_query ( paste0( &quot; 
+            select pin, date_of_service as spply_dt, spr, spr_rsp, rpr
+            from mbs&quot;, data_source_suffix, 
+            &quot; where item in ( &#39;00023&#39;, &#39;00005&#39;, &#39;00053&#39;
+            ) AND
+            pin in (
+            select pin
+            from pbs&quot;, data_source_suffix, &quot; 
+            JOIN pbs_item pi USING (pbs_code) 
+            WHERE pi.atc_code LIKE &#39;N02A%&#39;) 
+  &quot;)) %&gt;%
+  as.tibble() %&gt;% 
+  { . } -&gt; df_mbs</code></pre>
+</div>
+<div id="analyse-data" class="section level1">
+<h1>Analyse data</h1>
+<ul>
+<li>for each patient</li>
+<li>for each script, calculate start and end</li>
+</ul>
+<pre class="r"><code>find_multi_script_group &lt;- function  (supply_date, ndays ) {
+  overlap = 5
+  pos = 1
+  group_id = 0
+  rv=c()
+  while (pos &lt;= length( ndays )) {
+    start_group = pos
+    end_date = supply_date[ pos ] + ndays[ pos ] + overlap
+
+    pos = pos + 1
+    in_session=TRUE
+    while ( (pos &lt;= length( ndays )) &amp;
+           (supply_date[pos] - overlap &lt; end_date) 
+         ) {
+      end_date = supply_date[ pos ] + ndays[ pos ] + overlap
+      pos = pos + 1
+    }
+    rv = c(rv, rep( group_id, pos - start_group  ))
+    group_id = group_id + 1
+  }
+  rv
+}</code></pre>
+<ol style="list-style-type: decimal">
+<li>find contiguious and/or overlapping multi drug episodes</li>
+<li>find the doctor consults within that period</li>
+<li>create df_intersect, containing every intersection of the entire multi script episode with any doctor consults</li>
+</ol>
+<pre class="r"><code>if (file.exists( intersect_filename )) {
+  load( intersect_filename, verbose=TRUE )
+} else {
+  #
+
+
+  df_pbs %&gt;%
+    mutate( row_id = row_number() ) %&gt;%
+    group_by( pin ) %&gt;%
+    arrange( pin, spply_dt ) %&gt;%
+    mutate( group = find_multi_script_group( spply_dt, quantity)) %&gt;%
+    group_by( pin, group ) %&gt;%
+    arrange( pin, spply_dt, group ) %&gt;% 
+    mutate( gl = max( spply_dt ) - min(spply_dt ), 
+           ndays = sum(quantity ),
+           nscripts = n()) %&gt;%
+    filter( nscripts &gt; 1 ) %&gt;% 
+    { . } -&gt; df_pbs_multi_groups
+  #
+  #
+  df_pbs_multi_groups  %&gt;%
+    group_by( pin, group, nscripts ) %&gt;%
+    summarise( start_date = min( spply_dt ) - 7, 
+              end_date = max( spply_dt ),
+              quantity = sum(quantity)
+              ) %&gt;%
+    group_by( pin ) %&gt;%
+    select( pin,  start_date, end_date, group, quantity, nscripts) %&gt;% 
+    nest( start_date, end_date,  group, quantity, nscripts, .key=pbs ) %&gt;%
+    { . } -&gt; df_pbs_nested
+  #
+  #
+  df_mbs %&gt;%
+    group_by(pin) %&gt;%
+    mutate( end_date = spply_dt + 7,
+           start_date = spply_dt - 7) %&gt;%
+     select( pin, spr, spply_dt, start_date, end_date) %&gt;% 
+    nest( spr, spply_dt, start_date, end_date, .key=mbs ) %&gt;%
+    { . } -&gt; df_mbs_nested
+  #
+  #
+  no_cores &lt;- detectCores() - 1
+  cluster &lt;- create_cluster(no_cores)
+  #
+  df_mbs_nested %&gt;%
+    inner_join( df_pbs_nested ) %&gt;% 
+    partition(pin, cluster=cluster )  %&gt;%
+    { . } -&gt; df_both
+  #
+  cluster_library(df_both, c(&quot;tidyverse&quot;, &quot;IRanges&quot;, &quot;fuzzyjoin&quot;))
+  #
+  #
+  df_both %&gt;%
+    do( joined = interval_inner_join( data.frame(.$mbs), 
+                                     data.frame(.$pbs), 
+                                     by=c(&#39;start_date&#39;,&#39;end_date&#39;) ))  %&gt;%
+  collect() %&gt;%
+  ungroup() %&gt;%
+  unnest() %&gt;% 
+  { . } -&gt; df_intersect
+  #
+  #
+  #
+  save(df_intersect, file=intersect_filename)
+
+}</code></pre>
+<pre><code>Loading objects:
+  df_intersect</code></pre>
+</div>
+<div id="analysis---number-of-distinct-practicioners-for-each-period" class="section level1">
+<h1>analysis - number of distinct practicioners for each period</h1>
+<p>Greater than 2 distinct practicioners, less than 10 days per practicioner, greater than 1 scripts</p>
+<pre class="r"><code>df_intersect %&gt;%
+  mutate( ndays = end_date.y - start_date.y ) %&gt;%
+  filter( ndays &lt; 2000 ) %&gt;%
+  group_by( pin, group, ndays, nscripts ) %&gt;%
+  distinct( spr ) %&gt;%
+  count( sort=TRUE) %&gt;%
+  rename( distinct_spr_n = n ) %&gt;%
+  mutate( days_per_spr = ndays / distinct_spr_n) %&gt;%
+  arrange( days_per_spr) %&gt;%
+  filter( distinct_spr_n &gt; 1 &amp; days_per_spr &lt; 10  &amp; nscripts &gt; 2 ) %&gt;%
+  group_by( pin ) %&gt;% 
+  count() %&gt;% 
+  { . } -&gt; df_doctor_shoppers
+
+
+df_doctor_shoppers %&gt;%
+  inner_join( df_people ) %&gt;% 
+  { . } -&gt; df_doctor_shoppers</code></pre>
+<pre><code>Joining, by = &quot;pin&quot;</code></pre>
+<pre class="r"><code>df_intersect %&gt;%
+  mutate( ndays = end_date.y - start_date.y ) %&gt;%
+  filter( ndays &lt; 2000 ) %&gt;%
+  group_by( pin, group, ndays  ) %&gt;%
+  summarise( quantity = sum( quantity)) %&gt;%
+  mutate( pills_per_day = quantity / as.integer( ndays) )</code></pre>
+<pre><code># A tibble: 9,666 x 5
+# Groups:   pin, group [9,666]
+   pin         group ndays     quantity pills_per_day
+   &lt;chr&gt;       &lt;dbl&gt; &lt;time&gt;       &lt;int&gt;         &lt;dbl&gt;
+ 1 00003359562     0 &quot; 7 days&quot;       40          5.71
+ 2 00003359562     2 &quot; 7 days&quot;       40          5.71
+ 3 00003359562     3 &quot; 7 days&quot;       40          5.71
+ 4 00005399472     3 18 days        234         13   
+ 5 00005399472     4 41 days        400          9.76
+ 6 00005399472     5 58 days        700         12.1 
+ 7 00005399472     8 14 days         20          1.43
+ 8 00005399472     9 16 days         20          1.25
+ 9 00005399472    10 &quot; 7 days&quot;       10          1.43
+10 00006237413     0 &quot; 7 days&quot;       80         11.4 
+# ... with 9,656 more rows</code></pre>
+<pre class="r"><code>df_doctor_shoppers %&gt;%
+  ggplot( aes( sex, fill=sex )) +
+  geom_bar()</code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df_doctor_shoppers %&gt;%
+  ggplot( aes(age_group, fill=sex )) +
+  geom_bar()</code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis1-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df_doctor_shoppers %&gt;%
+  ggplot( aes(age_group, fill=sex )) +
+  geom_bar( position=&#39;dodge&#39;) </code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis1-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df_doctor_shoppers %&gt;%
+  ggplot( aes( sex, age, fill=sex )) +
+  geom_boxplot()</code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis1-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df_doctor_shoppers %&gt;%
+  ggplot( aes( sex, age, fill=sex )) +
+  geom_violin()</code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis1-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df_pbs %&gt;%
+  inner_join( df_people ) %&gt;%
+  left_join( df_doctor_shoppers, by=&#39;pin&#39;) %&gt;%
+  mutate( type = ifelse( is.na(n ), &#39;use&#39;, &#39;misuse&#39;) ) %&gt;% 
+  rename( sex = sex.x, age = age.x, age_group = age_group.x ) %&gt;%
+  { . } -&gt; df_combined</code></pre>
+<pre><code>Joining, by = &quot;pin&quot;</code></pre>
+<pre class="r"><code>df_combined  %&gt;%
+  filter( type==&#39;misuse&#39; ) %&gt;%
+  group_by( pin, sex, age, type ) %&gt;%
+  summarise( quantity = sum( quantity )) %&gt;%
+  ggplot( aes( sex, quantity, fill=sex )) + 
+  geom_violin() </code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis1-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df_combined  %&gt;%
+  filter( type==&#39;misuse&#39; ) %&gt;%
+  group_by( pin, sex, age, type ) %&gt;%
+  summarise( quantity = sum( quantity )) %&gt;%
+  ggplot( aes( sex, quantity, fill=sex )) + 
+  geom_boxplot() +
+  scale_y_log10() + ggtitle (&#39;average pills per person, log scale&#39;)</code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/analysis1-7.png" width="672" style="display: block; margin: auto;" /></p>
+<p>average number of pills / script</p>
+<pre class="r"><code>df_combined  %&gt;%
+  filter( type==&#39;misuse&#39; ) %&gt;%
+  group_by( sex ) %&gt;%
+  summarise( quantity = sum( quantity ) / n())</code></pre>
+<pre><code># A tibble: 2 x 2
+  sex   quantity
+  &lt;chr&gt;    &lt;dbl&gt;
+1 F         26.9
+2 M         30.1</code></pre>
+<pre class="r"><code>df_doctor_shoppers  %&gt;%
+  ggplot( aes( age_group, fill=sex  )) + 
+  geom_histogram(stat=&#39;count&#39;, position=&#39;dodge&#39; ) </code></pre>
+<pre><code>Warning: Ignoring unknown parameters: binwidth, bins, pad</code></pre>
+<p><img src="figure/findDoctorShopping.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.4 (2018-03-15)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 17.10
+
+Matrix products: default
+BLAS: /usr/lib/x86_64-linux-gnu/openblas/libblas.so.3
+LAPACK: /usr/lib/x86_64-linux-gnu/libopenblasp-r0.2.20.so
+
+locale:
+ [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8    
+ [5] LC_MONETARY=en_AU.UTF-8    LC_MESSAGES=en_AU.UTF-8   
+ [7] LC_PAPER=en_AU.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] bindrcpp_0.2.2        keyring_1.1.0         RPostgreSQL_0.6-2    
+ [4] DBI_1.0.0             forcats_0.3.0         dplyr_0.7.6          
+ [7] purrr_0.2.5           readr_1.1.1           tidyr_0.8.1          
+[10] tibble_1.4.2          ggplot2_2.2.1         tidyverse_1.2.1      
+[13] multidplyr_0.0.0.9000 IRanges_2.12.0        S4Vectors_0.16.0     
+[16] BiocGenerics_0.24.0   lubridate_1.7.4       workflowr_1.1.1      
+[19] pander_0.6.2          kableExtra_0.9.0      knitr_1.20           
+[22] stringr_1.3.1         wrapr_1.5.1           nvimcom_0.9-75       
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.18      lattice_0.20-35   utf8_1.1.4       
+ [4] assertthat_0.2.0  rprojroot_1.3-2   digest_0.6.15    
+ [7] R6_2.2.2          cellranger_1.1.0  plyr_1.8.4       
+[10] backports_1.1.2   evaluate_0.10.1   httr_1.3.1       
+[13] pillar_1.3.0      rlang_0.2.1       lazyeval_0.2.1   
+[16] readxl_1.1.0      rstudioapi_0.7    whisker_0.3-2    
+[19] R.utils_2.6.0     R.oo_1.22.0       rmarkdown_1.10   
+[22] labeling_0.3      munsell_0.5.0     broom_0.5.0      
+[25] compiler_3.4.4    modelr_0.1.2      pkgconfig_2.0.1  
+[28] htmltools_0.3.6   tidyselect_0.2.4  fansi_0.2.3      
+[31] viridisLite_0.3.0 crayon_1.3.4      R.methodsS3_1.7.1
+[34] grid_3.4.4        nlme_3.1-137      jsonlite_1.5     
+[37] gtable_0.2.0      git2r_0.23.0      magrittr_1.5     
+[40] scales_0.5.0      cli_1.0.0         stringi_1.2.3    
+[43] xml2_1.2.0        tools_3.4.4       glue_1.3.0       
+[46] hms_0.4.2         yaml_2.1.19       colorspace_1.3-2 
+[49] rvest_0.3.2       bindr_0.1.1       haven_1.1.2      </code></pre>
+</div>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
