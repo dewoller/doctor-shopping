@@ -21,8 +21,9 @@ Try to find the doctor shoppers from within the pbs
 
 ```{r results='hide', message=FALSE, warning=FALSE}
 
-data_source_suffix='_rr'
 data_source_suffix=''
+data_source_suffix='_rr'
+data_source_suffix='_r'
 
 intersect_filename = paste0( 'data/df_intersect', data_source_suffix, '.rda')
 
@@ -50,13 +51,7 @@ my_db_get_query ( paste0( " select * from patient", data_source_suffix)) %>%
 my_db_get_query ( paste0( " 
             select pin, date_of_service as spply_dt, spr, spr_rsp, rpr
             from mbs", data_source_suffix, 
-            " where item in (
-                    select item
-                    from mbs_rr JOIN mbs_desc_latest USING (item)
-                    where description like '%attendance%'
-                    group by 1
-                    order by count(*) desc
-                    limit 20
+            " where item in ( '00023', '00005', '00053'
             ) AND
             pin in (
             select pin
@@ -77,7 +72,7 @@ my_db_get_query ( paste0( "
 ```{r}
 
 find_multi_script_group <- function  (supply_date, ndays ) {
-  overlap = 1
+  overlap = 5
   pos = 1
   group_id = 0
   rv=c()
@@ -194,9 +189,39 @@ df_intersect %>%
   rename( distinct_spr_n = n ) %>%
   mutate( days_per_spr = ndays / distinct_spr_n) %>%
   arrange( days_per_spr) %>%
-  filter( distinct_spr_n >= 2 & days_per_spr < 10  & nscripts >= 2 ) %>%
-  group_by( pin ) %>%
-  count()
+  filter( distinct_spr_n > 1 & days_per_spr < 10  & nscripts > 2 ) %>%
+  group_by( pin ) %>% 
+  count() %>% 
+  { . } -> df_doctor_shoppers
+
+1
+
+df_intersect %>%
+  mutate( ndays = end_date.y - start_date.y ) %>%
+  filter( ndays < 2000 ) %>%
+  group_by( pin, group, ndays  ) %>%
+  summarise( quantity = sum( quantity)) %>%
+  mutate( pills_per_day = quantity / as.integer( ndays) )
+
+
+df_doctor_shoppers %>%
+  inner_join( df_people ) %>%
+  ggplot( aes( sex )) +
+  geom_bar()
+
+df_doctor_shoppers %>%
+  inner_join( df_people ) %>%
+  ggplot( aes(age_group, fill=sex )) +
+  geom_bar()
+
+
+df_doctor_shoppers %>%
+  inner_join( df_people ) %>%
+  ggplot( aes( sex, yob )) +
+  geom_boxplot()
+  
+
+
 
 
 ```
