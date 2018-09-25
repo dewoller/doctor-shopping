@@ -199,6 +199,9 @@ df_doctor_shoppers %>%
   inner_join( df_people ) %>% 
   { . } -> df_doctor_shoppers
 
+
+write.csv( df_doctor_shoppers, 'data/doctor_shoppers.csv', row.names=FALSE)
+
 df_intersect %>%
   mutate( ndays = end_date.y - start_date.y ) %>%
   filter( ndays < 2000 ) %>%
